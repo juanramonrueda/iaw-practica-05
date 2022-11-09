@@ -14,11 +14,6 @@ database_user=Usuario_PrestaShop
 database_password=Password_PrestaShop
 
 
-# Variables para TLS mediante Certbot
-certbot_email=tetz_dqhwr17@yutep.com
-certbot_domain=prestashop05jrrl.ddns.net
-
-
 #-----------------------------------------------------------------------------------------------------------------------------
 # Instalación de Unzip para descomprimir en formato .zip
 apt-get install unzip -y
@@ -48,26 +43,6 @@ echo "GRANT ALL PRIVILEGES ON $database_prestashop.* TO '$database_user'@'%';" |
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
-# Preparación de TLS
-
-# Instalación de core mediante snap
-snap install core
-
-snap refresh core
-
-# Borrado de instalación de Certbot si hubiese e instalación limpia del mismo
-apt-get remove certbot
-
-snap install --classic certbot
-
-# Creación de enlace simbólico a /usr/bin para ejecutar el comando certbot
-ln -s /snap/bin/certbot /usr/bin/certbot
-
-# Ejecución de Certbot para obtener TLS
-certbot --apache -m $certbot_email --agree-tos --no-eff-email -d $certbot_domain
-
-
-#-----------------------------------------------------------------------------------------------------------------------------
 # Descarga de archivos de PrestaShop
 
 # Creación de directorio para PrestaShop
@@ -76,10 +51,8 @@ mkdir -p /var/www/prestashop
 # Creación de directorio en el directorio temporal para almacenar los archivos que se generen en la descarga y descompresión
 mkdir -p /tmp/prestashop
 
-# Cambio del directorio que sirve por defecto los sitios web de Apache, tanto por HTTP como por HTTPS
+# Cambio del directorio que sirve por defecto los sitios web de Apache
 sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/prestashop|' /etc/apache2/sites-available/000-default.conf
-
-sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/prestashop|' /etc/apache2/sites-available/000-default-le-ssl.conf
 
 # Descarga del paquete completo de PrestaShop en /tmp/prestashop
 wget -P /tmp/prestashop https://github.com/PrestaShop/PrestaShop/releases/download/8.0.0/prestashop_8.0.0.zip
@@ -117,16 +90,16 @@ rm -rf /tmp/php-ps-info
 # Corrección de errores concretos de PHP para PrestaShop
 
 # Correción de max_input_vars
-sed -i "s/;max_input_vars = 1000/max_input_vars = 5000/" /etc/php/8.1/apache2/php.ini
+sed -i "s/;max_input_vars = 1000/max_input_vars = 5000/" /etc/php/7.4/apache2/php.ini
 
 # Correción de memory_limit
-sed -i "s/memory_limit = 128M/memory_limit = 256M/" /etc/php/8.1/apache2/php.ini
+sed -i "s/memory_limit = 128M/memory_limit = 256M/" /etc/php/7.4/apache2/php.ini
 
 # Correción de post_max_size
-sed -i "s/post_max_size = 8M/post_max_size = 128M/" /etc/php/8.1/apache2/php.ini
+sed -i "s/post_max_size = 8M/post_max_size = 128M/" /etc/php/7.4/apache2/php.ini
 
 # Corrección de upload_max_filesize
-sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 128M/" /etc/php/8.1/apache2/php.ini
+sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 128M/" /etc/php/7.4/apache2/php.ini
 
 # Módulos PHP necesarios para PrestaShop; el módulo php-imagick da problemas en instalación desatendida
 apt install php-bcmath php-imagick php-intl php-memcached php-mbstring php-zip php-gd php-json php-curl -y

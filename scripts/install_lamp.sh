@@ -7,7 +7,7 @@ set -x
 apt-get update
 
 # Actualización los programas de los repositorios instalados, no funciona correctamente por eso está comentado
-#apt-get upgrade -y
+apt-get upgrade -y
 
 
 #---------------------------------------------------------------------------------------------------------------

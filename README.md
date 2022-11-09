@@ -2,7 +2,7 @@
 
 ## Práctica 5 de IAW - Instalación de PrestaShop
 
-Realizaremos la instalación y configuración de **PrestaShop** en Ubuntu Server, para ello, usaremos una instancia nueva y asignaremos una dirección IP elástica a la instancia, además de preparar un nombre de host a la dirección IP de la máquina mediante [No-IP](https://www.noip.com/es-MX).
+Realizaremos la instalación y configuración de **PrestaShop** en **Ubuntu Server 20.04** con **al menos 2 GB de memoria RAM**, para ello, usaremos una instancia nueva y asignaremos una dirección IP elástica a la instancia, además de preparar un nombre de host a la dirección IP de la máquina mediante [No-IP](https://www.noip.com/es-MX).
 
 ![Hostname No-IP](img/No-IP_05.png)
 
@@ -67,17 +67,10 @@ database_prestashop=DB_PrestaShop
 database_user=Usuario_PrestaShop
 database_password=Password_PrestaShop
 
-certbot_email=tetz_dqhwr17@yutep.com
-certbot_domain=prestashop05jrrl.ddns.net
-
 apt-get install unzip -y
 ```
 
-La variable **PHPMYADMIN_APP_PASSWORD** nos permite guardar la contraseña para phpMyAdmin y poder usarla para crear una base de datos, con un usuario y una contraseña para esa base de datos.
-
-La variable **certbot_email** y **certbot_domain** nos permite establecer el correo electrónico y el dominio de forma respectiva (que hemos creado con **No-IP**) para realizar el uso de **SSL** / **TLS** en el servidor y dar seguridad cuando sirva la página web.
-
-Las demás variables nos sirven para establecer los parámetros de la creación de la base de datos junto a usuario y contraseña. Después realizaremos la instalación de **Unzip** para descomprimir paquetes en formato **.zip**.
+La variable **PHPMYADMIN_APP_PASSWORD** nos permite guardar la contraseña para phpMyAdmin y poder usarla para crear una base de datos, con un usuario y una contraseña para esa base de datos. Las demás variables nos sirven para establecer los parámetros de la creación de la base de datos junto a usuario y contraseña. Después realizaremos la instalación de **Unzip** para descomprimir paquetes en formato **.zip**.
 
 #### Preparación e instalación de phpMyAdmin junto a creación de una base de datos
 
@@ -99,24 +92,6 @@ echo "GRANT ALL PRIVILEGES ON $database_prestashop.* TO '$database_user'@'%';" |
 
 Con los primeros cuatro **echo** "importaremos" la configuración necesaria para pasar mediante **pipe** o **tubería** la configuración a **debconf-set-selections** y realizar una instalación desatendida de **phpMyAdmin**. Después instalaremos phpMyAdmin usando los parámetros anteriores. Importaremos la base de datos dando la configuración que creamos conveniente usando las variables locales que hemos establecido al principio.
 
-#### Preparación e instalación de certificado para HTTPS
-
-```bash
-snap install core
-
-snap refresh core
-
-apt-get remove certbot
-
-snap install --classic certbot
-
-ln -s /snap/bin/certbot /usr/bin/certbot
-
-certbot --apache -m $certbot_email --agree-tos --no-eff-email -d $certbot_domain
-```
-
-A continuación, usaremos **snap** que nos permite integrar tanto la aplicación o el programa como las dependencias que necesita para poder funcionar correctamente, de esta forma instalaremos **core** junto con todo lo que necesita y actualizaremos. Eliminaremos por si hubiese una instalación previa de **Certbot** para realizar la instalación limpia del programa para obtener el certificado y poder usar **TLS** en la instancia. Una vez instalado Certbot, crearemos un enlace simbólico en la ruta **/usr/bin** para poder ejecutar el comando sin tener que especificar la ruta de instalación del mismo. Por último de esta parte, obtendremos el certificado para que nuestro servidor pueda usar **https** mediante **TLS** haciendo referencia al dominio que tiene creado mediante **No-IP**.
-
 #### Preparación de PrestaShop
 
 ```bash
@@ -125,8 +100,6 @@ mkdir -p /var/www/prestashop
 mkdir -p /tmp/prestashop
 
 sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/prestashop|' /etc/apache2/sites-available/000-default.conf
-
-sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/prestashop|' /etc/apache2/sites-available/000-default-le-ssl.conf
 ```
 
 Realizaremos la creación de dos directorios, uno en **/var/www** que alojará PrestaShop y el segundo que alojará las descargas y archivos comprimidos. A continuación estableceremos el directorio **/var/www/prestashop** como el prioritario cuando se consulte la dirección IP del servidor o mediante nombre de dominio usando TLS.
@@ -170,7 +143,7 @@ Empezaremos solucionando el apartado de **PHP Configuration**, para ello, tenemo
 
 ![Búsqueda de las líneas mediante grep](img/Grep_PHP_Configuration.png)
 
-Buscaremos línea a línea, de forma que la sintaxis del comando será **grep max_input_vars \* -R**, buscaremos max_input_vars y que contenga cero o varios caracteres más mediante **el asterísco** y de forma recursiva desde el directorio en el que nos encontramos con el modificador **-R**. De esta forma buscaremos todas las líneas de **PHP Configuration**. Veremos que cada línea nos da dos archivos en los que se encuentra cada línea, en **8.1/cli/php.ini** y en **8.1/apache2/php.ini**. Nos interesa el archivo **8.1/apache2/php.ini**, por lo que será este el que modifiquemos. También nos da la línea completa que queríamos buscar de forma que primero es la ruta y el archivo separado con un **colon** o **puntos dobles** y la línea completa en el archivo.
+Buscaremos línea a línea, de forma que la sintaxis del comando será **grep max_input_vars \* -R**, buscaremos max_input_vars y que contenga cero o varios caracteres más mediante **el asterísco** y de forma recursiva desde el directorio en el que nos encontramos con el modificador **-R**. De esta forma buscaremos todas las líneas de **PHP Configuration**. Veremos que cada línea nos da dos archivos en los que se encuentra cada línea, en **7.4/cli/php.ini** y en **7.4/apache2/php.ini**. Nos interesa el archivo **7.4/apache2/php.ini**, por lo que será este el que modifiquemos. También nos da la línea completa que queríamos buscar de forma que primero es la ruta y el archivo separado con un **colon** o **puntos dobles** y la línea completa en el archivo.
 
 En el primer **grep**, la línea es **;max_input_vars = 1000** debemos tener en cuenta el **semicolon** o **punto y coma** ya que es un comentario y hace que la línea no "exista" aunque esté en el archivo, de forma que ***tenemos que quitar el comentario y modificar el valor***. Las demás líneas no tienen problema de comentario, por lo que únicamente tenemos que cambiar el valor.
 
@@ -178,16 +151,16 @@ En el primer **grep**, la línea es **;max_input_vars = 1000** debemos tener en 
 
 Usaremos el comando **SED** para modificar todas las líneas, con el modificador **-i** hacemos que el cambio se haga directamente en el archivo, para agrupar la órden, el patrón de búsqueda y el patrón de sustitución usaremos bien comillas dobles o comillas simples, y como delimitador entre la órden, el patrón de búsqueda y el patrón de sustitución podemos usar **slash** **/**, **backslash** **\\** o **hash** **#**.
 
-La órden será la "**s**" para buscar y sustituir y el patrón de búsqueda será el resultado completo que nos ha dado el comando **GREP**, **;max_input_vars = 1000** y como patrón de sustitución pondremos la línea sin el comentario y el nuevo valor que nos indica en el navegador web, **max_input_vars = 5000**,  por último como será un comando del script, deberemos hacer referencia a la ruta completa del archivo, **/etc/php/8.1/apache2/php.ini**. Ejecutaremos el comando y comprobaremos que se ha cambiado correctamente. De esta forma, haremos los cambios a las demás líneas y las añadiremos al script quedando así:
+La órden será la "**s**" para buscar y sustituir y el patrón de búsqueda será el resultado completo que nos ha dado el comando **GREP**, **;max_input_vars = 1000** y como patrón de sustitución pondremos la línea sin el comentario y el nuevo valor que nos indica en el navegador web, **max_input_vars = 5000**,  por último como será un comando del script, deberemos hacer referencia a la ruta completa del archivo, **/etc/php/7.4/apache2/php.ini**. Ejecutaremos el comando y comprobaremos que se ha cambiado correctamente. De esta forma, haremos los cambios a las demás líneas y las añadiremos al script quedando así:
 
 ```bash
-sed -i "s/;max_input_vars = 1000/max_input_vars = 5000/" /etc/php/8.1/apache2/php.ini
+sed -i "s/;max_input_vars = 1000/max_input_vars = 5000/" /etc/php/7.4/apache2/php.ini
 
-sed -i "s/memory_limit = 128M/memory_limit = 256M/" /etc/php/8.1/apache2/php.ini
+sed -i "s/memory_limit = 128M/memory_limit = 256M/" /etc/php/7.4/apache2/php.ini
 
-sed -i "s/post_max_size = 8M/post_max_size = 128M/" /etc/php/8.1/apache2/php.ini
+sed -i "s/post_max_size = 8M/post_max_size = 128M/" /etc/php/7.4/apache2/php.ini
 
-sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 128M/" /etc/php/8.1/apache2/php.ini
+sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 128M/" /etc/php/7.4/apache2/php.ini
 ```
 
 ![Configuración de PHP resuelta](img/PHP_Configuration_Resolved.png)
@@ -208,7 +181,7 @@ apt install php-bcmath php-imagick php-intl php-memcached php-mbstring php-zip p
 
 Como hicimos con **PHP Configuration**, una vez hayamos instalado las extensiones, reiniciaremos el servicio de Apache y comprobaremos que están todas correctas.
 
-**DATO**: La extensión **php-imagick** me da errores al realizar la instalación, los mismos errores que da cuando se trata de realizar **upgrade** al sistema operativo.
+**DATO**: La extensión **php-imagick** me da errores al realizar la instalación en **Ubuntu 22.04**, los mismos errores que da cuando se trata de realizar **upgrade** al sistema operativo, no permitiendo hacer una instalación desatendida.
 
 ![Directorios y Módulo de Apache](img/PrestaShop_Directories.png)
 
@@ -221,13 +194,13 @@ Por último, habilitaremos el módulo **mod_rewrite** de Apache mediante el coma
 El script deberá quedar de la siguiente manera:
 
 ```bash
-sed -i "s/;max_input_vars = 1000/max_input_vars = 5000/" /etc/php/8.1/apache2/php.ini
+sed -i "s/;max_input_vars = 1000/max_input_vars = 5000/" /etc/php/7.4/apache2/php.ini
 
-sed -i "s/memory_limit = 128M/memory_limit = 256M/" /etc/php/8.1/apache2/php.ini
+sed -i "s/memory_limit = 128M/memory_limit = 256M/" /etc/php/7.4/apache2/php.ini
 
-sed -i "s/post_max_size = 8M/post_max_size = 128M/" /etc/php/8.1/apache2/php.ini
+sed -i "s/post_max_size = 8M/post_max_size = 128M/" /etc/php/7.4/apache2/php.ini
 
-sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 128M/" /etc/php/8.1/apache2/php.ini
+sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 128M/" /etc/php/7.4/apache2/php.ini
 
 apt install php-bcmath php-imagick php-intl php-memcached php-mbstring php-zip php-gd php-json php-curl -y
 
@@ -257,7 +230,6 @@ prestashop_language=es
 prestashop_shop_name="Tienda PrestaShop JRRL"
 prestashop_activity=7
 country_code=es
-ssl_state=1
 admin_firstname="Juan Ramón"
 admin_lastname="Rueda Lao"
 admin_email_back_office=tetz_dqhwr17@yutep.com
@@ -281,7 +253,6 @@ php index_cli.php \
     --name=$prestashop_shop_name \
     --activity=$prestashop_activity \
     --country=$country_code \
-    --ssl=$ssl_state \
     --firstname=$admin_firstname \
     --lastname=$admin_lastname \
     --email=$admin_email_back_office \
