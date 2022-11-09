@@ -47,4 +47,7 @@ php index_cli.php \
 
 #----------------------------------------------------------------------------------------------------------------------
 # Borrado de directorio install y phppsinfo.php dentro de /var/www/prestashop
-rm -rf /var/www/prestashop/phppsinfo.php /var/www/prestashop/install
+rm -rf /var/www/prestashop/phppsinfo.php
+
+#rm- rf /var/www/prestashop/install
+
