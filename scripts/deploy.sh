@@ -5,10 +5,10 @@ set -x
 
 #----------------------------------------------------------------------------------------------------------------------
 # Variables para PrestaShop
-prestashop_language=ES
+prestashop_language=es
 prestashop_shop_name="Tienda PrestaShop JRRL"
 prestashop_activity=7
-country_code=ES
+country_code=es
 ssl_state=1
 admin_firstname="Juan Ramón"
 admin_lastname="Rueda Lao"
@@ -28,7 +28,7 @@ database_prefix=P_S_
 cd /var/www/prestashop/install
 
 # Ejecución de la instalación de PrestaShop
-php index_cli.php
+php index_cli.php \
     --language=$prestashop_language \
     --name=$prestashop_shop_name \
     --activity=$prestashop_activity \
