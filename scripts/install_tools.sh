@@ -19,8 +19,6 @@ certbot_email=tetz_dqhwr17@yutep.com
 certbot_domain=prestashop05jrrl.ddns.net
 
 
-
-
 #-----------------------------------------------------------------------------------------------------------------------------
 # Instalación de Unzip para descomprimir en formato .zip
 apt-get install unzip -y
@@ -129,9 +127,6 @@ sed -i "s/post_max_size = 8M/post_max_size = 128M/" /etc/php/8.1/apache2/php.ini
 
 # Corrección de upload_max_filesize
 sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 128M/" /etc/php/8.1/apache2/php.ini
-
-# Reinicio de varios servicios que pueden provocar problemas de instalación desatendida
-systemctl restart apache2.service multipathd.service mysql.service packagekit.service unattended-upgrades.service
 
 # Módulos PHP necesarios para PrestaShop; el módulo php-imagick da problemas en instalación desatendida
 apt install php-bcmath php-imagick php-intl php-memcached php-mbstring php-zip php-gd php-json php-curl -y
