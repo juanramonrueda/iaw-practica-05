@@ -109,6 +109,9 @@ unzip /tmp/php-ps-info/v1.1.zip -d /tmp/php-ps-info
 # Se mueve el archivo phppsinfo.php a /var/www/prestashop
 mv /tmp/php-ps-info/php-ps-info-1.1/phppsinfo.php /var/www/prestashop
 
+# Borrado del directorio que hemos creado en /tmp
+rm -rf /tmp/php-ps-info
+
 
 #----------------------------------------------------------------------------------------------------------------------
 # Corrección de errores concretos de PHP para PrestaShop
