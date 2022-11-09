@@ -113,3 +113,34 @@ unzip /tmp/php-ps-info/v1.1.zip -d /tmp/php-ps-info
 
 # Se mueve el archivo phppsinfo.php a /var/www/prestashop
 mv /tmp/php-ps-info/php-ps-info-1.1/phppsinfo.php /var/www/prestashop
+
+
+#----------------------------------------------------------------------------------------------------------------------
+# Corrección de errores concretos de PHP para PrestaShop
+
+# Correción de max_input_vars
+sed -i "s/;max_input_vars = 1000/max_input_vars = 5000/" /etc/php/8.1/apache2/php.ini
+
+# Correción de memory_limit
+sed -i "s/memory_limit = 128M/memory_limit = 256M/" /etc/php/8.1/apache2/php.ini
+
+# Correción de post_max_size
+sed -i "s/post_max_size = 8M/post_max_size = 128M/" /etc/php/8.1/apache2/php.ini
+
+# Corrección de upload_max_filesize
+sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 128M/" /etc/php/8.1/apache2/php.ini
+
+# Reinicio de varios servicios que pueden provocar problemas de instalación desatendida
+systemctl restart apache2.service multipathd.service mysql.service packagekit.service unattended-upgrades.service
+
+# Módulos PHP necesarios para PrestaShop; el módulo php-imagick da problemas en instalación desatendida
+apt install php-bcmath php-imagick php-intl php-memcached php-mbstring php-zip php-gd php-json php-curl -y
+
+# Falta un directorio para PrestaShop
+mkdir -p /var/www/prestashop/app/Resources/translations
+
+# Módulo de Apache mod_rewrite
+a2enmod rewrite
+
+# Cambio de propietario y grupo para /var/www/html
+chown -R www-data:www-data /var/www/prestashop
