@@ -4,7 +4,7 @@
 
 Realizaremos la instalación y configuración de **PrestaShop** en Ubuntu Server, para ello, usaremos una instancia nueva y asignaremos una dirección IP elástica a la instancia, además de preparar un nombre de host a la dirección IP de la máquina mediante [No-IP](https://www.noip.com/es-MX).
 
-![Hostname No-IP](img/No-IP-05.png)
+![Hostname No-IP](img/No-IP_05.png)
 
 A continuación prepararemos el repositorio, de forma que tenga la siguiente estructura:
 
