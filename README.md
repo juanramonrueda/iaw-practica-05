@@ -13,7 +13,7 @@ A continuación prepararemos el repositorio, de forma que tenga la siguiente est
     + scripts --> Directorio
         + install_lamp.sh --> Archivo
         + install_tools.sh  --> Archivo
-        + deploy.sh
+        + deploy.sh --> Archivo
     
 
 Cuando tengamos la estructura creada, daremos permisos de ejecución al usuario propietario de los scripts, usaremos el comando **chmod** y lo modificaremos según la ruta en la que nos encontremos, salvo que accedamos directamente al directorio **scripts** como sería el caso:
@@ -270,6 +270,8 @@ database_prefix=P_S_
 ```
 
 Definiremos unas variables para la instalación de PrestaShop que nos permiten personalizar la tienda online.
+
+#### Instalación de PrestaShop
 
 ```bash
 cd /var/www/prestashop/install
