@@ -78,9 +78,6 @@ sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/prestashop|' /etc/apa
 
 sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/prestashop|' /etc/apache2/sites-available/000-default-le-ssl.conf
 
-# Reinicio de Apache para que se apliquen los cambios anteriores
-systemctl restart apache2
-
 # Creación de directorio en el directorio temporal para almacenar los archivos que se generen en la descarga y descompresión
 mkdir -p /tmp/prestashop
 
@@ -139,3 +136,6 @@ a2enmod rewrite
 
 # Cambio de propietario y grupo para /var/www/html
 chown -R www-data:www-data /var/www/prestashop
+
+# Reinicio de Apache para que se apliquen los cambios anteriores
+systemctl restart apache2
