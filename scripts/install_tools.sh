@@ -73,13 +73,13 @@ certbot --apache -m $certbot_email --agree-tos --no-eff-email -d $certbot_domain
 # Creación de directorio para PrestaShop
 mkdir -p /var/www/prestashop
 
+# Creación de directorio en el directorio temporal para almacenar los archivos que se generen en la descarga y descompresión
+mkdir -p /tmp/prestashop
+
 # Cambio del directorio que sirve por defecto los sitios web de Apache, tanto por HTTP como por HTTPS
 sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/prestashop|' /etc/apache2/sites-available/000-default.conf
 
 sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/prestashop|' /etc/apache2/sites-available/000-default-le-ssl.conf
-
-# Creación de directorio en el directorio temporal para almacenar los archivos que se generen en la descarga y descompresión
-mkdir -p /tmp/prestashop
 
 # Descarga del paquete completo de PrestaShop en /tmp/prestashop
 wget -P /tmp/prestashop https://github.com/PrestaShop/PrestaShop/releases/download/8.0.0/prestashop_8.0.0.zip
