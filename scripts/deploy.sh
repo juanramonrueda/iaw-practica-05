@@ -9,6 +9,7 @@ prestashop_language=es
 prestashop_shop_name="Tienda PrestaShop JRRL"
 prestashop_activity=7
 country_code=es
+ssl_state=1
 admin_firstname="Juan Ramón"
 admin_lastname="Rueda Lao"
 admin_email_back_office=tetz_dqhwr17@yutep.com
@@ -18,7 +19,7 @@ database_name=DB_PrestaShop
 database_user=Usuario_PrestaShop
 database_password=Password_PrestaShop
 database_prefix=P_S_
-ip_address_domain=practicasiawjrrl.ddns.net
+ip_address_domain=3.220.76.169
 
 
 #----------------------------------------------------------------------------------------------------------------------
@@ -33,6 +34,7 @@ php index_cli.php \
     --name=$prestashop_shop_name \
     --activity=$prestashop_activity \
     --country=$country_code \
+    --ssl=$ssl_state \
     --firstname=$admin_firstname \
     --lastname=$admin_lastname \
     --email=$admin_email_back_office \
