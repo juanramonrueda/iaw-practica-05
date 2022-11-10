@@ -19,7 +19,7 @@ database_name=DB_PrestaShop
 database_user=Usuario_PrestaShop
 database_password=Password_PrestaShop
 database_prefix=P_S_
-ip_address_domain=3.220.76.169
+ip_address_domain=practicasiawjrrl.ddns.net
 
 
 #----------------------------------------------------------------------------------------------------------------------
