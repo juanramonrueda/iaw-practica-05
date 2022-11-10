@@ -33,6 +33,8 @@ set -x
 
 apt-get update
 
+apt-get upgrade -y
+
 apt-get install apache2 -y
 
 apt-get install mysql-server -y
@@ -63,6 +65,9 @@ set -x
 
 PHPMYADMIN_APP_PASSWORD=phpmyadmin_password
 
+certbot_email=tetz_dqhwr17@yutep.com
+certbot_domain=practicasiawjrrl.ddns.net
+
 database_prestashop=DB_PrestaShop
 database_user=Usuario_PrestaShop
 database_password=Password_PrestaShop
@@ -70,7 +75,7 @@ database_password=Password_PrestaShop
 apt-get install unzip -y
 ```
 
-La variable **PHPMYADMIN_APP_PASSWORD** nos permite guardar la contraseña para phpMyAdmin y poder usarla para crear una base de datos, con un usuario y una contraseña para esa base de datos. Las demás variables nos sirven para establecer los parámetros de la creación de la base de datos junto a usuario y contraseña. Después realizaremos la instalación de **Unzip** para descomprimir paquetes en formato **.zip**.
+La variable **PHPMYADMIN_APP_PASSWORD** nos permite guardar la contraseña para phpMyAdmin y poder usarla para crear una base de datos, con un usuario y una contraseña para esa base de datos. Estableceremos dos variables para obtener el certificado SSL / TLS mediante el cliente de Certbot. Las demás variables nos sirven para establecer los parámetros de la creación de la base de datos junto a usuario y contraseña. Después realizaremos la instalación de **Unzip** para descomprimir paquetes en formato **.zip**.
 
 #### Preparación e instalación de phpMyAdmin junto a creación de una base de datos
 
@@ -95,11 +100,29 @@ Con los primeros cuatro **echo** "importaremos" la configuración necesaria para
 #### Preparación de PrestaShop
 
 ```bash
+snap install core
+
+snap refresh core
+
+apt-get remove certbot
+
+snap install --classic certbot
+
+ln -s /snap/bin/certbot /usr/bin/certbot
+
+certbot --apache -m $certbot_email --agree-tos --no-eff-email -d $certbot_domain
+```
+
+Realizaremos la instalación del cliente de Certbot para obtener un certificado SSL /TLS a nuestro servidor.
+
+```bash
 mkdir -p /var/www/prestashop
 
 mkdir -p /tmp/prestashop
 
 sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/prestashop|' /etc/apache2/sites-available/000-default.conf
+
+sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/prestashop|' /etc/apache2/sites-available/000-default-le-ssl.conf
 ```
 
 Realizaremos la creación de dos directorios, uno en **/var/www** que alojará PrestaShop y el segundo que alojará las descargas y archivos comprimidos. A continuación estableceremos el directorio **/var/www/prestashop** como el prioritario cuando se consulte la dirección IP del servidor o mediante nombre de dominio usando TLS.
@@ -230,6 +253,7 @@ prestashop_language=es
 prestashop_shop_name="Tienda PrestaShop JRRL"
 prestashop_activity=7
 country_code=es
+ssl_state=1
 admin_firstname="Juan Ramón"
 admin_lastname="Rueda Lao"
 admin_email_back_office=tetz_dqhwr17@yutep.com
@@ -239,6 +263,7 @@ database_name=DB_PrestaShop
 database_user=Usuario_PrestaShop
 database_password=Password_PrestaShop
 database_prefix=P_S_
+ip_address_domain=3.220.76.169
 ```
 
 Definiremos unas variables para la instalación de PrestaShop que nos permiten personalizar la tienda online.
@@ -253,6 +278,7 @@ php index_cli.php \
     --name=$prestashop_shop_name \
     --activity=$prestashop_activity \
     --country=$country_code \
+    --ssl=$ssl_state \
     --firstname=$admin_firstname \
     --lastname=$admin_lastname \
     --email=$admin_email_back_office \
@@ -261,7 +287,8 @@ php index_cli.php \
     --db_name=$database_name \
     --db_user=$database_user \
     --db_password=$database_password \
-    --prefix=$database_prefix
+    --prefix=$database_prefix \
+    --domain=$ip_address_domain
 
 ```
 
