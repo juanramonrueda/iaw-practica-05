@@ -34,16 +34,17 @@ certbot --apache -m $certbot_email --agree-tos --no-eff-email -d $certbot_domain
 
 
 #----------------------------------------------------------------------------------------------------------------------------
-# Descarga de archivos de PrestaShop
+# Preparación y descarga de archivos de PrestaShop
 
-# Creación de directorio en el directorio temporal para almacenar los archivos que se generen en la descarga y descompresión
-mkdir -p /tmp/prestashop
 
 # Cambio del directorio que sirve por defecto los sitios web de Apache
 sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/prestashop|' /etc/apache2/sites-available/000-default.conf
 
 # Cambio del directorio que sirve por defecto los sitios web de Apache mediante TLS
 sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/prestashop|' /etc/apache2/sites-available/000-default-le-ssl.conf
+
+# Creación de directorio en el directorio temporal para almacenar los archivos que se generen en la descarga y descompresión
+mkdir -p /tmp/prestashop
 
 # Descarga del paquete completo de PrestaShop en /tmp/prestashop
 wget -P /tmp/prestashop https://github.com/PrestaShop/PrestaShop/releases/download/8.0.0/prestashop_8.0.0.zip
@@ -53,6 +54,12 @@ unzip /tmp/prestashop/prestashop_8.0.0.zip -d /tmp/prestashop
 
 # Descompresión de los archivos necesarios de PrestaShop en /var/www/html usando el modificador -d
 unzip /tmp/prestashop/prestashop.zip -d /var/www/prestashop
+
+# Cambio de propietario y grupo para /var/www/html
+chown -R www-data:www-data /var/www/prestashop
+
+# Renicio de Apache
+systemctl restart apache2
 
 # Borrado de todos los archivos y directorios que se han descomprimido en /tmp/prestashop
 rm -rf /tmp/prestashop

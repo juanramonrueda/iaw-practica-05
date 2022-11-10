@@ -14,6 +14,7 @@ A continuación prepararemos el repositorio, de forma que tenga la siguiente est
         + install_lamp.sh --> Archivo
         + install_tools.sh  --> Archivo
         + deploy.sh --> Archivo
+        + php_fix.php --> Archivo
     
 
 Cuando tengamos la estructura creada, daremos permisos de ejecución al usuario propietario de los scripts, usaremos el comando **chmod** y lo modificaremos según la ruta en la que nos encontremos, salvo que accedamos directamente al directorio **scripts** como sería el caso:
@@ -65,9 +66,6 @@ set -x
 
 PHPMYADMIN_APP_PASSWORD=phpmyadmin_password
 
-certbot_email=tetz_dqhwr17@yutep.com
-certbot_domain=practicasiawjrrl.ddns.net
-
 database_prestashop=DB_PrestaShop
 database_user=Usuario_PrestaShop
 database_password=Password_PrestaShop
@@ -75,7 +73,7 @@ database_password=Password_PrestaShop
 apt-get install unzip -y
 ```
 
-La variable **PHPMYADMIN_APP_PASSWORD** nos permite guardar la contraseña para phpMyAdmin y poder usarla para crear una base de datos, con un usuario y una contraseña para esa base de datos. Estableceremos dos variables para obtener el certificado SSL / TLS mediante el cliente de Certbot. Las demás variables nos sirven para establecer los parámetros de la creación de la base de datos junto a usuario y contraseña. Después realizaremos la instalación de **Unzip** para descomprimir paquetes en formato **.zip**.
+La variable **PHPMYADMIN_APP_PASSWORD** nos permite guardar la contraseña para phpMyAdmin y poder usarla para crear una base de datos, con un usuario y una contraseña para esa base de datos. Las demás variables nos sirven para establecer los parámetros de la creación de la base de datos junto a usuario y contraseña. Después realizaremos la instalación de **Unzip** para descomprimir paquetes en formato **.zip**.
 
 #### Preparación e instalación de phpMyAdmin junto a creación de una base de datos
 
@@ -97,7 +95,7 @@ echo "GRANT ALL PRIVILEGES ON $database_prestashop.* TO '$database_user'@'%';" |
 
 Con los primeros cuatro **echo** "importaremos" la configuración necesaria para pasar mediante **pipe** o **tubería** la configuración a **debconf-set-selections** y realizar una instalación desatendida de **phpMyAdmin**. Después instalaremos phpMyAdmin usando los parámetros anteriores. Importaremos la base de datos dando la configuración que creamos conveniente usando las variables locales que hemos establecido al principio.
 
-#### Preparación de PrestaShop
+### Preparación de Certbot
 
 ```bash
 snap install core
@@ -110,37 +108,12 @@ snap install --classic certbot
 
 ln -s /snap/bin/certbot /usr/bin/certbot
 
-certbot --apache -m $certbot_email --agree-tos --no-eff-email -d $certbot_domain
-```
-
-Realizaremos la instalación del cliente de Certbot para obtener un certificado SSL /TLS a nuestro servidor.
-
-```bash
 mkdir -p /var/www/prestashop
-
-mkdir -p /tmp/prestashop
-
-sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/prestashop|' /etc/apache2/sites-available/000-default.conf
-
-sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/prestashop|' /etc/apache2/sites-available/000-default-le-ssl.conf
 ```
 
-Realizaremos la creación de dos directorios, uno en **/var/www** que alojará PrestaShop y el segundo que alojará las descargas y archivos comprimidos. A continuación estableceremos el directorio **/var/www/prestashop** como el prioritario cuando se consulte la dirección IP del servidor o mediante nombre de dominio usando TLS.
+Realizaremos la instalación del cliente de Certbot para obtener un certificado SSL /TLS en nuestro servidor. Por último de este script, crearemos el directorio que contendrá PrestaShop en **/var/www**.
 
-```bash
-wget -P /tmp/prestashop https://github.com/PrestaShop/PrestaShop/releases/download/8.0.0/prestashop_8.0.0.zip
-
-unzip /tmp/prestashop/prestashop_8.0.0.zip -d /tmp/prestashop
-
-unzip /tmp/prestashop/prestashop.zip -d /var/www/prestashop
-
-rm -rf /tmp/prestashop
-
-```
-
-Descargaremos el archivo comprimido en **/tmp/prestashop** usando el modificador **-d** de **WGET**, usaremos **UNZIP** para obtener el segundo archivo comprimido y realizaremos la última descompresión en **/var/www/prestashop** ya que son los archivos y directorios que necesitamos para la instalación mediante **CLI** (Command Line Interface). Por último, borraremos el directorio que hemos creado en **/tmp**.
-
-#### Instalación para comprobar los requisitos necesarios de PHP para PrestaShop
+### Preparación de php_fix.sh
 
 ```bash
 mkdir -p /tmp/php-ps-info
@@ -150,9 +123,31 @@ wget -P /tmp/php-ps-info https://github.com/PrestaShop/php-ps-info/archive/refs/
 unzip /tmp/php-ps-info/v1.1.zip -d /tmp/php-ps-info
 
 mv /tmp/php-ps-info/php-ps-info-1.1/phppsinfo.php /var/www/prestashop
+
+rm -rf /tmp/php-ps-info
 ```
 
-Realizaremos la instalación de **phppsinfo.php** para comprobar los requisitos que necesitamos para que nuestro ***PrestaShop*** pueda funcionar correctamente. Crearemos un directorio en **/tmp** que nos permitirá almacenar el archivo **.zip** y su contenido. Realizaremos la desarga en el directorio **/tmp/php-ps-info** y descomprimiremos el archivo. Moveremos **phppsinfo.php** que se encuentra en **/tmp/php-ps-info/php-ps-info-1.1** para dejarlo en **/var/www/prestashop**. Para finalizar esta parte, borraremos el directorio que hemos creado en **/tmp**.
+Antes de instalar PrestaShop, veremos los requisitos que necesitamos para que funcione correctamente. Crearemos un directorio en **/tmp** que alojará el archivo comprimido y dos archivos más. Después descargaremos el archivo comprimido y descomprimiremos su contenido en el mismo directorio de descarga, moveremos el archivo **phppsinfo.php** que está en **/tmp/php-ps-info/php-ps-info-1.1** y lo movemos a **/var/www/prestashop**. Borraremos el directorio que hemos creado en **/tmp**.
+
+```bash
+sed -i "s/;max_input_vars = 1000/max_input_vars = 5000/" /etc/php/7.4/apache2/php.ini
+
+sed -i "s/memory_limit = 128M/memory_limit = 256M/" /etc/php/7.4/apache2/php.ini
+
+sed -i "s/post_max_size = 8M/post_max_size = 128M/" /etc/php/7.4/apache2/php.ini
+
+sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 128M/" /etc/php/7.4/apache2/php.ini
+
+apt install php-bcmath php-imagick php-intl php-memcached php-mbstring php-zip php-gd php-json php-curl -y
+
+mkdir -p /var/www/prestashop/app/Resources/translations
+
+a2enmod rewrite
+
+systemctl restart apache2
+```
+
+Estos comandos nos permiten cambiar ciertos parámetros de PHP, instalar varios módulos, crear un directorio que no viene creado en la instalación de PrestaShop, habilitar el módulo rewrite de Apache y el posterior reinicio del servidor web para aplicar los cambios realizados anteriormente.
 
 #### Comprobación de los requisitos necesarios de PHP para PrestaShop
 
@@ -174,7 +169,7 @@ En el primer **grep**, la línea es **;max_input_vars = 1000** debemos tener en 
 
 Usaremos el comando **SED** para modificar todas las líneas, con el modificador **-i** hacemos que el cambio se haga directamente en el archivo, para agrupar la órden, el patrón de búsqueda y el patrón de sustitución usaremos bien comillas dobles o comillas simples, y como delimitador entre la órden, el patrón de búsqueda y el patrón de sustitución podemos usar **slash** **/**, **backslash** **\\** o **hash** **#**.
 
-La órden será la "**s**" para buscar y sustituir y el patrón de búsqueda será el resultado completo que nos ha dado el comando **GREP**, **;max_input_vars = 1000** y como patrón de sustitución pondremos la línea sin el comentario y el nuevo valor que nos indica en el navegador web, **max_input_vars = 5000**,  por último como será un comando del script, deberemos hacer referencia a la ruta completa del archivo, **/etc/php/7.4/apache2/php.ini**. Ejecutaremos el comando y comprobaremos que se ha cambiado correctamente. De esta forma, haremos los cambios a las demás líneas y las añadiremos al script quedando así:
+La órden será la "**s**" para buscar y sustituir y el patrón de búsqueda será el resultado completo que nos ha dado el comando **GREP**, **;max_input_vars = 1000** y como patrón de sustitución pondremos la línea sin el comentario y el nuevo valor que nos indica en el navegador web, **max_input_vars = 5000**,  por último como será un comando del script, deberemos hacer referencia a la ruta completa del archivo, **/etc/php/7.4/apache2/php.ini**. Ejecutaremos el comando y comprobaremos que se ha cambiado correctamente. De esta forma, haremos los cambios a las demás líneas quedando así:
 
 ```bash
 sed -i "s/;max_input_vars = 1000/max_input_vars = 5000/" /etc/php/7.4/apache2/php.ini
@@ -217,6 +212,16 @@ Por último, habilitaremos el módulo **mod_rewrite** de Apache mediante el coma
 El script deberá quedar de la siguiente manera:
 
 ```bash
+mkdir -p /tmp/php-ps-info
+
+wget -P /tmp/php-ps-info https://github.com/PrestaShop/php-ps-info/archive/refs/tags/v1.1.zip
+
+unzip /tmp/php-ps-info/v1.1.zip -d /tmp/php-ps-info
+
+mv /tmp/php-ps-info/php-ps-info-1.1/phppsinfo.php /var/www/prestashop
+
+rm -rf /tmp/php-ps-info
+
 sed -i "s/;max_input_vars = 1000/max_input_vars = 5000/" /etc/php/7.4/apache2/php.ini
 
 sed -i "s/memory_limit = 128M/memory_limit = 256M/" /etc/php/7.4/apache2/php.ini
@@ -249,6 +254,9 @@ Terminaremos con este último script que nos permite realizar la instalación de
 
 set -x
 
+certbot_email=tetz_dqhwr17@yutep.com
+certbot_domain=practicasiawjrrl.ddns.net
+
 prestashop_language=es
 prestashop_shop_name="Tienda PrestaShop JRRL"
 prestashop_activity=7
@@ -266,7 +274,41 @@ database_prefix=P_S_
 ip_address_domain=3.220.76.169
 ```
 
-Definiremos unas variables para la instalación de PrestaShop que nos permiten personalizar la tienda online.
+Definiremos unas variables para la obtención del sertificado mediante Certbot y para la instalación de PrestaShop que nos permiten personalizar la tienda online.
+
+#### Obtención del certificado SSL / TLS mediante Certbot
+
+```bash
+certbot --apache -m $certbot_email --agree-tos --no-eff-email -d $certbot_domain
+```
+
+Realizaremos la obtención de un certificado SSL / TLS mediante Certbot, de forma que nuestro servidor pueda tener cifradas las conexiones con los clientes, tendremos que crear un **hostname** como hicimos con **No-IP** y pasar un correo electrónico.
+
+#### Preparación de PrestaShop
+
+```bash
+sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/prestashop|' /etc/apache2/sites-available/000-default.conf
+
+sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/prestashop|' /etc/apache2/sites-available/000-default-le-ssl.conf
+
+mkdir -p /tmp/prestashop
+
+wget -P /tmp/prestashop https://github.com/PrestaShop/PrestaShop/releases/download/8.0.0/prestashop_8.0.0.zip
+
+unzip /tmp/prestashop/prestashop_8.0.0.zip -d /tmp/prestashop
+
+unzip /tmp/prestashop/prestashop.zip -d /var/www/prestashop
+
+chown -R www-data:www-data /var/www/prestashop
+
+systemctl restart apache2
+
+rm -rf /tmp/prestashop
+```
+
+Antes de realizar la instalación de PrestaShop, tenemos que preparar en el directorio **/var/www/prestashop** que hemos creado al final del script **install_tools.sh** los archivos de PrestaShop. Como nos interesa que el directorio que hemos creado contenga los archivos de PrestaShop, tendremos que modificar el directorio por defecto de Apache, con el comando **SED** modificaremos tanto el archivo **000-default.conf para el puerto 80** y el archivo **000-default-le-ssl.conf para el puerto 443**. Crearemos un directorio en **/tmp** que almacenará varios archivos comprimidos y otros tipos de archivos, haremos la descarga de **PrestaShop 8.0.0** en el directorio **/tmp/prestashop** ya que los archivos que nos interesan se encuentran en otro archivo comprimido dentro del archivo de descarga. Descomprimiremos el segundo archivo comprimido **prestashop.zip** directamente en el directorio **/var/www/prestashop** usando el modificador **-d**. Cambiaremos tanto el propietario como el grupo de pertenencia de todos los directorios y archivos que contiene el directorio prestashop de forma recursiva a Apache y reiniciaremos el servidor web. Por último en esta parte, borraremos el directorio prestashop que se encuentra en **/tmp**.
+
+***Antes de continuar, tendríamos que comprobar el archivo phppsinfo.php para cerciorarnos de que todo está correcto y podemos continuar con la instalación.***
 
 #### Instalación de PrestaShop
 
