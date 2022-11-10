@@ -8,6 +8,10 @@ set -x
 # Variable para phpMyAdmin
 PHPMYADMIN_APP_PASSWORD=phpmyadmin_password
 
+# Variables para Certbot
+certbot_email=tetz_dqhwr17@yutep.com
+certbot_domain=practicasiawjrrl.ddns.net
+
 # Variables para creación de base de datos con usuario y contraseña
 database_prestashop=DB_PrestaShop
 database_user=Usuario_PrestaShop
@@ -43,6 +47,28 @@ echo "GRANT ALL PRIVILEGES ON $database_prestashop.* TO '$database_user'@'%';" |
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
+# Instalación de Certbot y obtención de TLS
+
+# Instalación de snapd
+snap install core
+
+# Actualización de snapd
+snap refresh core
+
+# Desinstalación de Certbot por si hubiese uno de antes
+apt-get remove certbot
+
+# Instalación de cliente de Certbot
+snap install --classic certbot
+
+# Creación de alias para Certbot
+ln -s /snap/bin/certbot /usr/bin/certbot
+
+# Obtención de TLS
+certbot --apache -m $certbot_email --agree-tos --no-eff-email -d $certbot_domain
+
+
+#-----------------------------------------------------------------------------------------------------------------------------
 # Descarga de archivos de PrestaShop
 
 # Creación de directorio para PrestaShop
@@ -53,6 +79,9 @@ mkdir -p /tmp/prestashop
 
 # Cambio del directorio que sirve por defecto los sitios web de Apache
 sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/prestashop|' /etc/apache2/sites-available/000-default.conf
+
+# Cambio del directorio que sirve por defecto los sitios web de Apache mediante TLS
+sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/prestashop|' /etc/apache2/sites-available/000-default-le-ssl.conf
 
 # Descarga del paquete completo de PrestaShop en /tmp/prestashop
 wget -P /tmp/prestashop https://github.com/PrestaShop/PrestaShop/releases/download/8.0.0/prestashop_8.0.0.zip

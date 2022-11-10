@@ -18,6 +18,7 @@ database_name=DB_PrestaShop
 database_user=Usuario_PrestaShop
 database_password=Password_PrestaShop
 database_prefix=P_S_
+ip_address_domain=practicasiawjrrl.ddns.net
 
 
 #----------------------------------------------------------------------------------------------------------------------
@@ -40,7 +41,8 @@ php index_cli.php \
     --db_name=$database_name \
     --db_user=$database_user \
     --db_password=$database_password \
-    --prefix=$database_prefix
+    --prefix=$database_prefix \
+    --domain=$ip_address_domain
 
 
 #----------------------------------------------------------------------------------------------------------------------
