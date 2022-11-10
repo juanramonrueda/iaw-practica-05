@@ -3,7 +3,7 @@
 set -x
 
 
-#----------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------
 # Variables para PrestaShop
 prestashop_language=es
 prestashop_shop_name="Tienda PrestaShop JRRL"
@@ -22,7 +22,40 @@ database_prefix=P_S_
 ip_address_domain=practicasiawjrrl.ddns.net
 
 
-#----------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------
+# Obtención de TLS
+certbot --apache -m $certbot_email --agree-tos --no-eff-email -d $certbot_domain
+
+
+#----------------------------------------------------------------------------------------------------------------------------
+# Descarga de archivos de PrestaShop
+
+# Creación de directorio para PrestaShop
+mkdir -p /var/www/prestashop
+
+# Creación de directorio en el directorio temporal para almacenar los archivos que se generen en la descarga y descompresión
+mkdir -p /tmp/prestashop
+
+# Cambio del directorio que sirve por defecto los sitios web de Apache
+sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/prestashop|' /etc/apache2/sites-available/000-default.conf
+
+# Cambio del directorio que sirve por defecto los sitios web de Apache mediante TLS
+sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/prestashop|' /etc/apache2/sites-available/000-default-le-ssl.conf
+
+# Descarga del paquete completo de PrestaShop en /tmp/prestashop
+wget -P /tmp/prestashop https://github.com/PrestaShop/PrestaShop/releases/download/8.0.0/prestashop_8.0.0.zip
+
+# Descompresión de PrestaShop en el mismo directorio
+unzip /tmp/prestashop/prestashop_8.0.0.zip -d /tmp/prestashop
+
+# Descompresión de los archivos necesarios de PrestaShop en /var/www/html usando el modificador -d
+unzip /tmp/prestashop/prestashop.zip -d /var/www/prestashop
+
+# Borrado de todos los archivos y directorios que se han descomprimido en /tmp/prestashop
+rm -rf /tmp/prestashop
+
+
+#----------------------------------------------------------------------------------------------------------------------------
 # Instalación de PrestaShop mediante CLI
 
 # Desplazamiento al directorio que contiene la instalación de PrestaShop
@@ -47,7 +80,7 @@ php index_cli.php \
     --domain=$ip_address_domain
 
 
-#----------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------
 # Borrado de directorio install y phppsinfo.php dentro de /var/www/prestashop
 rm -rf /var/www/prestashop/phppsinfo.php
 
