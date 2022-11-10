@@ -4,6 +4,12 @@ set -x
 
 
 #----------------------------------------------------------------------------------------------------------------------------
+# Declaración de variables locales
+
+# Variables para Certbot
+certbot_email=tetz_dqhwr17@yutep.com
+certbot_domain=practicasiawjrrl.ddns.net
+
 # Variables para PrestaShop
 prestashop_language=es
 prestashop_shop_name="Tienda PrestaShop JRRL"
@@ -29,9 +35,6 @@ certbot --apache -m $certbot_email --agree-tos --no-eff-email -d $certbot_domain
 
 #----------------------------------------------------------------------------------------------------------------------------
 # Descarga de archivos de PrestaShop
-
-# Creación de directorio para PrestaShop
-mkdir -p /var/www/prestashop
 
 # Creación de directorio en el directorio temporal para almacenar los archivos que se generen en la descarga y descompresión
 mkdir -p /tmp/prestashop

@@ -8,10 +8,6 @@ set -x
 # Variable para phpMyAdmin
 PHPMYADMIN_APP_PASSWORD=phpmyadmin_password
 
-# Variables para Certbot
-certbot_email=tetz_dqhwr17@yutep.com
-certbot_domain=practicasiawjrrl.ddns.net
-
 # Variables para creación de base de datos con usuario y contraseña
 database_prestashop=DB_PrestaShop
 database_user=Usuario_PrestaShop
@@ -63,3 +59,8 @@ snap install --classic certbot
 
 # Creación de alias para Certbot
 ln -s /snap/bin/certbot /usr/bin/certbot
+
+
+#-----------------------------------------------------------------------------------------------------------------------------
+# Creación de directorio para alojar PrestaShop
+mkdir -p /var/www/prestashop
