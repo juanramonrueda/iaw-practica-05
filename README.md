@@ -295,3 +295,27 @@ php index_cli.php \
 Antes de la instalación de PrestaShop, nos desplazaremos al directorio de instalación, **/var/www/prestashop/install** y "ejecutaremos" el instalador **index_cli.php** pasándole los modificadores y su contenido que hemos definido al principio. Una vez haya terminado, nos mostrará el siguiente mensaje.
 
 ![Instalación correcta](img/Installation_Successful.png)
+
+### Configuración SSL / TLS de PrestaShop para acceso mediante hostname
+
+Cuando usemos el hostname que hemos establecido en **No-IP**, es posible que no podamos acceder al Front-End de PrestaShop, en ese caso tenemos que acceder al Back-Office o Back-End, tendremos que poner en el navegador el **hostname** separado por un **slash** **/** y **admin**.
+
+> **practicasiawjrrl.ddns.net/admin**
+
+En el servidor se cambiará el directorio **admin** que hay en el directorio de PrestaShop.
+
+![Creación de Admin](img/Access_Back_Office_Directory.png)
+
+Usaremos ese nuevo directorio para acceder al Back-Office.
+
+![Acceso Back-Office](img/Access_Back_Office.png)
+
+Pondremos el correo electrónico y la contraseña que hemos establecido en la instalación de PrestaShop.
+
+![Activación de SSL / TSL](img/Activate_SSL.png)
+
+Activaremos tanto **Activar SSL** como **Activar SSL en todas las páginas**.
+
+![Dominio PrestaShop](img/PrestaShop_Access.png)
+
+De esta forma tendremos nuestro PrestaShop con **SSL** / **TLS** para que se muestre la tienda.
